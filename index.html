@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>3-Minute Breathing Timer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #1e1e1e;
+      font-family: 'Open Sans', Arial, sans-serif;
+      color: #e0e0e0;
+    }
+
+    .timer-container {
+      text-align: center;
+      width: 80%;
+    }
+
+    .phase {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .remaining-time {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 30px;
+      background-color: #3a3a3a;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: #2ecc71;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+
+    .divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-color: #1e1e1e;
+    }
+
+    .divider:nth-child(2) {
+      left: 33.33%;
+    }
+
+    .divider:nth-child(3) {
+      left: 66.66%;
+    }
+
+    .segment-label {
+      position: absolute;
+      top: 35px;
+      font-size: 0.9rem;
+      color: #e0e0e0;
+      width: 33.33%;
+      text-align: center;
+    }
+
+    .segment-label:nth-child(1) {
+      left: 0%;
+    }
+
+    .segment-label:nth-child(2) {
+      left: 33.33%;
+    }
+
+    .segment-label:nth-child(3) {
+      left: 66.66%;
+    }
+
+    .controls button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1rem;
+      font-family: 'Open Sans', Arial, sans-serif;
+      font-weight: 600;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .start-button {
+      background-color: #2ecc71;
+      color: #1e1e1e;
+    }
+
+    .start-button:hover {
+      background-color: #27ae60;
+    }
+
+    .reset-button {
+      background-color: #8e44ad;
+      color: #ffffff;
+    }
+
+    .reset-button:hover {
+      background-color: #732d91;
+    }
+  </style>
+</head>
+<body>
+  <div class="timer-container">
+    <div class="phase" id="phase-display">Get Ready</div>
+    <div class="remaining-time" id="remaining-time">0.0 seconds</div>
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progress-bar"></div>
+      <div class="divider" style="left: 33.33%;"></div>
+      <div class="divider" style="left: 66.66%;"></div>
+      <div class="segment-label">Deep Squat</div>
+      <div class="segment-label">Quadruped Breathing</div>
+      <div class="segment-label">Supine Full Expansion Breaths</div>
+    </div>
+    <div class="controls">
+      <button class="start-button" id="start-button">Start</button>
+      <button class="reset-button" id="reset-button" style="display: none;">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const phases = [
+      { name: 'Deep Squat', duration: 60 },
+      { name: 'Quadruped Breathing', duration: 60 },
+      { name: 'Supine Full Expansion Breaths', duration: 60 },
+    ];
+
+    let phaseIndex = -1;
+    let timeLeft = 0;
+    let timerInterval;
+    let progressBarWidth = 0;
+
+    const phaseDisplay = document.getElementById('phase-display');
+    const remainingTime = document.getElementById('remaining-time');
+    const progressBar = document.getElementById('progress-bar');
+    const startButton = document.getElementById('start-button');
+    const resetButton = document.getElementById('reset-button');
+
+    function updateDisplay() {
+      if (phaseIndex === -1) {
+        phaseDisplay.textContent = 'Get Ready';
+        remainingTime.textContent = '0.0 seconds';
+        progressBar.style.width = '0%';
+      } else {
+        const currentPhase = phases[phaseIndex];
+        phaseDisplay.textContent = currentPhase.name;
+        remainingTime.textContent = `${timeLeft.toFixed(1)} seconds`;
+      }
+    }
+
+    function nextPhase() {
+      phaseIndex++;
+      if (phaseIndex < phases.length) {
+        const currentPhase = phases[phaseIndex];
+        timeLeft = currentPhase.duration;
+        updateDisplay();
+      } else {
+        clearInterval(timerInterval);
+        phaseDisplay.textContent = 'Finished!';
+        remainingTime.textContent = '0.0 seconds';
+        progressBar.style.width = '100%';
+        startButton.style.display = 'none';
+        resetButton.style.display = 'inline-block';
+      }
+    }
+
+    function startTimer() {
+      phaseIndex = 0;
+      timeLeft = phases[phaseIndex].duration;
+      progressBarWidth = 0;
+      startButton.style.display = 'none';
+      resetButton.style.display = 'inline-block';
+
+      timerInterval = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft -= 0.1;
+          progressBarWidth += (100 / 180) / 10; // Increment for every 0.1 seconds
+          progressBar.style.width = `${progressBarWidth}%`;
+        } else {
+          nextPhase();
+        }
+        updateDisplay();
+      }, 100); // Run every 0.1 seconds
+
+      updateDisplay();
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      phaseIndex = -1;
+      timeLeft = 0;
+      progressBarWidth = 0;
+      updateDisplay();
+      startButton.style.display = 'inline-block';
+      resetButton.style.display = 'none';
+    }
+
+    startButton.addEventListener('click', startTimer);
+    resetButton.addEventListener('click', resetTimer);
+
+    updateDisplay();
+  </script>
+</body>
+</html>
