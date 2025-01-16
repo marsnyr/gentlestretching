@@ -116,6 +116,20 @@
       progressBar.style.width = `${((60 - timeLeft) / 60) * 100}%`;
     }
 
+    function startCountdown(callback) {
+      let countdown = 3;
+      remainingTime.textContent = `Get Ready: ${countdown}`;
+      const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          remainingTime.textContent = `Get Ready: ${countdown}`;
+        } else {
+          clearInterval(countdownInterval);
+          callback();
+        }
+      }, 1000);
+    }
+
     function startTimer() {
       if (isRunning) return;
       isRunning = true;
@@ -123,17 +137,19 @@
       pauseButton.style.display = 'inline-block';
       resetButton.style.display = 'inline-block';
 
-      timerInterval = setInterval(() => {
-        if (timeLeft > 0) {
-          timeLeft = Math.max(0, timeLeft - 0.1); // Prevent negative time
-          updateDisplay();
-        } else {
-          clearInterval(timerInterval);
-          remainingTime.textContent = "Time's up!";
-          progressBar.style.width = '100%';
-          isRunning = false;
-        }
-      }, 100); // Run every 0.1 seconds
+      startCountdown(() => {
+        timerInterval = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft = Math.max(0, timeLeft - 0.1); // Prevent negative time
+            updateDisplay();
+          } else {
+            clearInterval(timerInterval);
+            remainingTime.textContent = "Time's up!";
+            progressBar.style.width = '100%';
+            isRunning = false;
+          }
+        }, 100); // Run every 0.1 seconds
+      });
     }
 
     function pauseTimer() {
